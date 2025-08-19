@@ -1,0 +1,75 @@
+START
+
+SET HISTORY_FILE to 'history.txt'
+
+DEFINE FUNCTION show_history:
+    OPEN HISTORY_FILE in read mode
+    READ all lines from the file
+    IF no lines exist:
+        DISPLAY "No history found."
+    ELSE:
+        FOR each line in reverse order:
+            DISPLAY the line (stripped of newline)
+    CLOSE the file
+
+DEFINE FUNCTION clear_history:
+    OPEN HISTORY_FILE in write mode (this clears the file)
+    CLOSE the file
+    DISPLAY "History Cleared"
+
+DEFINE FUNCTION save_to_history(equation, result):
+    OPEN HISTORY_FILE in append mode
+    WRITE equation + " = " + result to file
+    CLOSE the file
+
+DEFINE FUNCTION calculate(user_input):
+    SPLIT user_input into parts (number1 operator number2)
+    IF number of parts is not equal to 3:
+        DISPLAY "Invalid input. Please enter in the format: number operator number"
+        RETURN
+    CONVERT part[0] and part[2] to float → num1, num2
+    EXTRACT operator from part[1]
+
+    IF operator is '+':
+        result = num1 + num2
+    ELSE IF operator is '-':
+        result = num1 - num2
+    ELSE IF operator is '*':
+        result = num1 * num2
+    ELSE IF operator is '/':
+        IF num2 is 0:
+            DISPLAY "Error: Division by zero"
+            RETURN
+        result = num1 / num2
+    ELSE:
+        DISPLAY "Invalid operator"
+        RETURN
+
+    IF result is a whole number:
+        CONVERT result to integer
+    DISPLAY "Result: " + result
+    CALL save_to_history with user_input and result
+
+DEFINE FUNCTION main:
+    DISPLAY "__ simple calculator (type history, clear or exit)"
+
+CALL main()
+
+LOOP forever:
+    ASK user: "Enter calculation (+, -, *, /) or command: history, clear, exit: "
+    GET user_input
+
+    IF user_input is "exit":
+        DISPLAY "Goodbye!"
+        BREAK the loop
+
+    ELSE IF user_input is "history":
+        CALL show_history
+
+    ELSE IF user_input is "clear":
+        CALL clear_history
+
+    ELSE:
+        CALL calculate(user_input)
+
+END
